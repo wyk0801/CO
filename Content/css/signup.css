@@ -1,0 +1,127 @@
+
+.plans {
+	display: block;
+	overflow: hidden;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+
+  .plans > div , .plans > img, .plans > span{
+    float: left;
+    -webkit-box-flex: 1;
+    -webkit-flex: 1 1 0;
+    -ms-flex: 1 1 0;
+    flex: 1 1 0;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-align: start;
+    -webkit-align-items: flex-start;
+    -ms-flex-align: start;
+    align-items: flex-start; }
+.plans >.right{
+  float: right;
+}
+.plans >.ui-progress-bar{
+  flex:1;
+}
+.plans >.weui-cell__bd{
+  width: 25%;
+}
+.weui-search-bar__form{overflow: hidden;}
+.plans >.weui-cell__ft{
+  display: none;
+}
+#tab2 .plans .infor{
+    line-height:0.86rem;
+}
+.plans .right_bd{
+    float:right;
+}
+
+#tab2 .plans p{
+    line-height:0.86rem;
+}
+#tab2 .plans .weui-cell__ft{
+      padding-top:0.1rem;
+      display:block;
+  }
+  .search input{
+      top:0.05rem;
+  }
+.weui-dialog{
+     margin-left:-15%;
+     margin-top:-15%;
+  }
+.plan {
+	display: block;
+	overflow: hidden;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+  .plan > a {
+    width: 25%;
+    float: left;
+    -webkit-box-flex: 1;
+    -webkit-flex: 1 1 0;
+    -ms-flex: 1 1 0;
+    flex: 1 1 0;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-align: start;
+    -webkit-align-items: flex-start;
+    -ms-flex-align: start;
+    align-items: flex-start; }
+
+    .weui-check_label>.weui-cell__ft{
+    float:right;
+}
+  .weui-picker-modal.weui-picker-modal-visible{
+      display:block;
+  }
+  .weui-picker-modal {
+  display:none;
+}
+  .weui-dialog__ft{
+    width:100%;
+    height:2rem;
+    position:relative;
+	line-height: 0.64rem;
+	font-size: 0.30rem;
+}
+.weui-dialog__btn{
+	margin-top: 0.1rem;
+	color: #fff;
+}
+.weui-dialog .weui-dialog__btn.default{
+    position:absolute;
+    left:0.8rem;
+    top:0;
+	width: 1.70rem;
+	color: #fff;
+	background: url(../images/ture3.png);
+	background-size: 100% 100%;
+}
+.weui-dialog .weui-dialog__btn.primary{
+    position:absolute;
+    left:2.8rem;
+    top:0;
+	width: 1.70rem;
+	background: url(../images/wrong3.png);
+	background-size: 100% 100%;
+}

@@ -1,0 +1,353 @@
+﻿@{
+    ViewBag.Title = "详细信息";
+    Layout = "~/Views/Shared/_ExamLayout.cshtml";
+}
+<link href="/Content/css/area.css" rel="stylesheet" />
+<link href="~/Content/css/layer.css" rel="stylesheet" />
+<script src="~/Scripts/js/layer.min.js"></script>
+<script src="~/Content/login/js/jquery.placeholder.min.js"></script>
+<script>
+    $(function () {
+        $("input").placeholder();
+    });
+</script>
+<div class="header">
+    <ul>
+        <li class="border-b active"><a href="/Account/Register?competId=@ViewBag.competId" class=" return"><img src="~/Content/images/return.png" /></a>完善个人信息</li>
+    </ul>
+</div>
+<div class="weui-tab">
+    <div class="weui-tab__bd weui-tab__bd3">
+        <div id="tab4" class="weui-tab__bd-item weui-tab__bd-item--active">
+            <div class="weui-panel__bd login forget">
+                <div class="login-bg">
+                    <img src="~/Content/login/image/register_bg.png" />
+                </div>
+                <div class="my-form">
+                    <form action="Detailed?competId=@ViewBag.competId" method="post" onsubmit="return check()">
+                        <div class="libary common-div">
+                            <span style="width:0"></span>
+                            <input name="province" id="province" type="text" value="" placeholder="省" />
+                        </div>
+                        <div class="vae"></div>
+                        <div class="libary common-div">
+                            <span style="width:0"></span>
+                            <input id="city" type="text" name="city" value="" placeholder="市" />
+                        </div>
+                        <div class="vae"></div>
+                        <div class="libary common-div">
+                            <span style="width:0"></span>
+                            <input type="text" value="" size="15" id="homecity_name" name="homecity_name" mod="address|notice" mod_address_source="hotel" mod_address_reference="cityid" placeholder="图书馆名称" />
+                            <input id="hid_competid" name="hid_competid" type="hidden" value="@ViewBag.competId" />
+                        </div>
+                        <div class="vae"></div>
+                        <div class="school common-div">
+                            <span style="width:0"></span>
+                            <input id="school" type="text" name="school" value="" placeholder="学校" />
+                        </div>
+                        <div class="vae"></div>
+                        <div class="nj common-div">
+                            <span style="width:0"></span>
+                            <input id="grade" type="text" name="grade" value="" placeholder="年级" />
+                        </div>
+                        <div class="vae"></div>
+                        <div class="common-div">
+                            <span style="width:0"></span>
+                            <input id="classs" type="text" name="class" value="" placeholder="班级" />
+                        </div>
+                        <div class="vae"></div>
+                        <div class="common-div">
+                            <span style="width:0"></span>
+                            <input id="address" type="text" name="address" value="" placeholder="地址" />
+                        </div>
+                        <div class="vae"></div>
+                        <div class="forget-btn" id="Submit"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="jsContainer" class="jsContainer" style="height: 0;width:360px">
+        <div id="tuna_alert" style="display:none;position:absolute;z-index:999;overflow:hidden;"></div>
+        <div id="tuna_jmpinfo" style="visibility:hidden;position:absolute;z-index:120;"></div>
+    </div>
+</div>
+<script type="text/javascript" src="~/Scripts/js/select_library.js"></script>
+<script src="~/Scripts/js/jquery-weui.js"></script>
+<script type="text/javascript">
+    var allVal;
+    var Eprovince = true;  //省份是否通过
+    var Ecity = true; //城市是否通过
+    var Eunit = true;  //单位是否通过
+    var Esum = true;  //所有条件满足
+    //条件不成立，阻止表单提交
+    function check() {
+        $("#province").focus();
+        if ($("#province").parent().next()[0].innerText != '') {
+            Eprovince = false;
+        }
+        $("#city").focus();
+        if ($("#city").parent().next()[0].innerText != '') {
+            Ecity = false;
+        }
+        $("#homecity_name").focus();
+        if ($("#homecity_name").parent().next()[0].innerText != '') {
+            Eunit = false;
+        } else {
+            Eunit = true;
+        }
+        if (Eprovince && Ecity && Eunit) {
+            $.each($(".cue"), function (index, value) {
+                if (value.innerText == "") {   //条件满足显示，不满足遮罩
+                    Esum = true;
+                } else {
+                    Esum = false;
+                }
+            });
+        }
+        return Esum;
+    }
+    $(document).ready(function () {
+        //获取图书馆信息
+      //  GetLibray();
+        //获取年级
+        GetGradre();
+        //获取城市
+        GetProvince();
+        //弹框
+        function layerOpen(allVal) {
+            layer.open({
+                content: allVal,
+                btn: '确定'
+            });
+        }
+        //注册成功遮蔽罩
+        function layerOpen2() {
+            layer.open({
+                type: 2
+                , content: '注册成功...'
+                , time: 3,
+                end: function () {
+                    location.href = "/Account/Login?competId=@ViewBag.competId";
+                }
+            });
+        };
+
+        //获取年级
+        $("#grade").blur(function () {
+            GetGradre();
+        });
+
+        //省份光标事件
+        $("#province").blur(function () {
+            var provinceName = $("#province").val();
+            if (provinceName == "") {
+                Eprovince = false;
+                $("#province").parent().next()[0].innerText = '请选择省份!';
+            } else {
+                Eprovince = true;
+                $("#province").parent().next()[0].innerText = '';
+            }
+        });
+
+        //城市光标事件
+        $("#city").blur(function () {
+            var provinceName = $("#city").val();
+            if (provinceName == "") {
+                Ecity = false;
+                $("#city").parent().next()[0].innerText = '请选择市区!';
+            } else {
+                Ecity = true;
+                $("#city").parent().next()[0].innerText = '';
+            }
+        });
+
+        //单位判断
+        $("#homecity_name").blur(function () {
+            GetLibrayExit();
+        });
+
+        //文本改变时
+        $(document).on('click', function (e) {
+            GetLibrayExit();
+        });
+
+        //选择省份，获取二级菜单
+        $("#province").change(function () {
+            Getcity();
+        });
+
+        //第一次点击后隐藏提示文本省份，城市
+        $("#province").change(function () {
+            $("#province").parent().next()[0].innerText = '';
+        });
+
+        //城市选择
+        $("#city").change(function () {
+            $("#city").parent().next()[0].innerText = '';
+        });
+
+        //注册事件
+        $("#Submit").click(function () {
+            // var ok = false;
+            var provinceId = $("#province").attr("data-values");
+            var provinceName = $("#province").val();
+            var cityName = $("#city").val();
+            var cityId = $("#city").attr("data-values");
+            var homecityname = $("#homecity_name").val();
+            var school = $.trim($("#school").val());
+            var grade = $("#grade").val();
+            var classs = $.trim($("#classs").val());
+            var address = $.trim($("#address").val());
+            var sex = $("#sex").val();
+            if (provinceName == "") {
+                Eprovince = false;
+                $("#province").parent().next()[0].innerText = '请选择省份!';
+            } else {
+                Eprovince = true;
+                $("#province").parent().next()[0].innerText = '';
+            }
+            if (cityName == "") {
+                Ecity = false;
+                $("#city").parent().next()[0].innerText = '请选择市区!';
+            } else {
+                Ecity = true;
+                $("#city").parent().next()[0].innerText = '';
+            }
+            if (homecityname == "") {
+                Eunit = false;
+                $("#homecity_name").parent().next()[0].innerText = '图书馆不能为空!';
+            }
+            else {
+                $.post("GetlibrayExit", "librayName=" + homecityname, function (data) {
+                    if (data == "1") {
+                        Eunit = false;
+                        $("#homecity_name").parent().next()[0].innerText = '图书馆未找到';
+                    } else {
+                        Eunit = true;
+                        $("#homecity_name").parent().next()[0].innerText = '';
+                    }
+                });
+            }
+            if (Eprovince && Ecity && Eunit) {
+                $.ajax({
+                    url: "@System.Configuration.ConfigurationManager.AppSettings["API"]/API/Account/Express",
+                    type: "post",
+                    dataType: 'json',
+                    async: false,
+                    crossDomain: true == !(document.all),
+                    data: {
+                        "head": {
+                            "method": "co.users.add",
+                            "app_id": "co001",
+                            "timestamp": "2017-03-30 14:3000",
+                            "format": "json",
+                            "version": 1.0,
+                            "terminal_type": "web"
+                        },
+                        "param": {
+                            "user_id": "@Model.user_id",
+                            "password": "@Model.password",
+                            "email": "",
+                            "avatar": "@Model.avatar",
+                            "realName": "@Model.real_name",
+                            "gender": "@Model.gender",
+                            "birthday": "1983-02-24",
+                            "mobile_phone": "@Model.mobile_phone",
+                            "province_id": provinceId,
+                            "city_id": cityId,
+                            "school": school,
+                            "grade": grade,
+                            "classes": classs,
+                            "units": homecityname,
+                            "address": address,
+                            "group_id": "@ViewBag.groupid",
+                            "compet_id": "@ViewBag.competId"
+                        }
+                    },
+                    success: function (data) {
+                        var result = eval('(' + data + ')');
+                        if (result.head.code == "200") {
+                            layerOpen2();
+                        }
+                    }
+                });
+            }
+        });
+    });
+
+    //年级
+    function GetGradre() {
+        $.ajax({
+            type: "POST",
+            url: "GradeType",
+            dataType: "json",
+            async: false,
+            success: function (d) {
+                $("#grade").select({
+                    title: "选择年级",
+                    items: d
+                });
+            }
+        });
+    }
+
+    //绑定省份
+    function GetProvince() {
+        $.ajax({
+            type: "POST",
+            url: "Province",
+            dataType: "json",
+            async: false,
+            success: function (d) {
+                $("#province").select({
+                    title: "选择省份",
+                    items: d
+                });
+                $("#city").select({
+                    input: ""
+                });
+            }
+        });
+    }
+
+    //根据省份绑定市区
+    function Getcity() {
+        var pId = $("#province").attr("data-values");
+        $.ajax({
+            type: "POST",
+            url: "City",
+            dataType: "json",
+            async: false,
+            data: { pId: pId },
+            success: function (d) {
+                $("#city").select("update",
+                ({
+                    title: "选择市区",
+                    items: d
+                }));
+            }
+        });
+    }
+
+   
+
+    //判断图书馆是否存在
+    function GetLibrayExit() {
+        var provinceName = $("#homecity_name").val();
+        if (provinceName == "") {
+            Eunit = false;
+            $("#homecity_name").parent().next()[0].innerText = '图书馆名称不能为空!';
+        } else {
+            $.post("GetlibrayExit", "librayName=" + provinceName, function (data) {
+                if (data == "1") {
+                    Eunit = false;
+                    $("#homecity_name").parent().next()[0].innerText = '图书馆未找到';
+                } else {
+                    Eunit = true;
+                    $("#homecity_name").parent().next()[0].innerText = '';
+                }
+            });
+        }
+    }
+</script>

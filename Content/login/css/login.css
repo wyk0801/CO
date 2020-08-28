@@ -1,0 +1,21 @@
+
+.common-div {
+    position: relative;
+}
+.common-div .get{
+	border: 0;
+	position: absolute;
+	right: 0.2rem;
+	top:0.05rem;
+	width: 1.70rem;
+	height:0.56rem;
+	line-height: 0.54rem;
+	font-size: 0.28rem;
+	color: #fff;
+	outline: none;
+	background: #e5a645;
+	border-radius: 0.26rem;
+}
+.common-div .get:active{
+	background: #c1c1c1;
+}

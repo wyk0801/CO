@@ -1,0 +1,221 @@
+﻿@using System.Configuration
+@{
+    ViewBag.Title = "活动信息";
+    Layout = "~/Views/Shared/_ExamLayout.cshtml";
+}
+
+<div class="header">
+    <ul>
+        <li class="border-b active">我要参赛</li>
+    </ul>
+</div>
+<ul class="scr"></ul>
+<div class="weui-tab" style="background:#475fa7;">
+    <div class="weui-tab__bd weui-tab__bd2" style="background:url(/Content/images/img/bg1.png);background-size:100%;">
+        <div id="tab2" class="weui-tab__bd-item weui-tab__bd-item--active">
+            <div class="bg stage-container" style="margin-bottom:2.2rem;">
+
+            </div>
+        </div>
+    </div>
+    <div class="weui-tabbar weui-tabbar2 plan bottom-nav">
+        <a href="/Exam/Result" class="weui-tabbar__item weui-bar__item1">
+            <div class="weui-tabbar__icon"></div>
+        </a>
+        <a href="/Exam/Index" class="weui-tabbar__item weui-bar__item2">
+            <div class="weui-tabbar__icon"></div>
+        </a>
+        <a href="/Account/Study" class="weui-tabbar__item weui-bar__item3">
+            <div class="weui-tabbar__icon"></div>
+        </a>
+        <a href="/Account/Mine" class="weui-tabbar__item weui-bar__item4">
+            <div class="weui-tabbar__icon"></div>
+        </a>
+    </div>
+</div>
+<script src="~/Scripts/js/jquery-weui.js"></script>
+<script src="~/Scripts/js/layer.min.js"></script>
+<link href="~/Content/css/layer.css" rel="stylesheet" />
+<script src="~/Scripts/js/jquery.compet.cykj.js"></script>
+<script type="text/javascript">
+    var cModel = null;
+    var uModel = null;
+
+    $(document).ready(function () {
+        var competSerialize = localStorage.getItem('competModel');
+        var userSerialize = localStorage.getItem('accountModel');
+
+        if (competSerialize) {
+            cModel = JSON.parse(competSerialize);
+        } else {
+            $('body').html('大赛信息已过期,请重新扫描进入.');
+            return;
+        }
+
+        if (userSerialize) {
+            uModel = JSON.parse(userSerialize);
+        } else {
+            layerOpen('登录信息已过期，请重新登录', function (index) {
+                layer.close(index);
+                window.location.href = '/Account/Login/'
+            });
+        }
+        pageInit();
+        navInit();
+    });
+
+
+    var pageInit = function () {
+        var ajaxHandler = $.ajax({
+            type: "get",
+            url: "/api/exam/" + cModel.competId,
+            dataType: "json",
+            success: function (response) {
+
+                if (response.Status === 10001 && response.Result.Total > 0) {
+                    var rows = response.Result.Rows;
+                    var stage = $('.stage-container');
+                    var array = [
+                        '<div class="stage1">',
+                        //'<div class="left"><img src="/Content/images/img/{{STAGE}}.png"/></div>',
+                        '<div class="left"><img src="/Content/images/img/stage1.png"/></div>',
+                        '<div class="infor">',
+                        '<p class="start-time">开始时间：{{STARTING_TIME}}</p>',
+                        '<p>结束时间：{{ENDING_TIME}}</p>',
+                        '</div>',
+                        '<a href="#" class="btn btn-join" data-cdid="{{STAGE_ID}}" data-state="{{STAGE_STATE}}" data-type="{{EXAM_TYPE}}">',
+                        '<img src="/Content/images/img/stage1-{{STAGE_STATE}}.png"/>',
+                        '</a>',
+                        '</div>'
+                    ];
+
+                    $(rows).each(function (index, item) {
+                        var templet = array.join('').replace(/{{STAGE}}/g, 'stage' + item.exam_type)
+                                                    .replace('{{STARTING_TIME}}', item.begin_time)
+                                                    .replace('{{ENDING_TIME}}', item.end_time)
+                                                    .replace('{{STAGE_ID}}', item.cd_id)
+                                                    .replace(/{{STAGE_STATE}}/g, item.state)
+                                                    .replace('{{EXAM_TYPE}}', item.exam_type);
+                        stage.append('<div class="stage">' + templet + '</div>');
+                    });
+                }
+            }
+        });
+
+        ajaxHandler.then(function () {
+            $('.btn-join').click(function (e) {
+                e.preventDefault();
+                var btn = e.currentTarget;
+                var state = $(btn).data('state');
+                var cdid = $(btn).data('cdid');
+                var etid = $(btn).data('type');
+                if (state === 2) {
+                    check(cdid, etid);
+                    //doJoin(cdid, etid);
+                }
+            });
+        });
+    };
+
+
+    var navInit = function () {
+        $('.bottom-nav a').each(function (index, item) {
+            var url = $(item).prop('href') + '/?competid=' + cModel.encId;
+            $(item).prop('href', url);
+        });
+    }
+
+    /**
+     * 点击进入比赛
+     */
+    var doJoin = function (cdid, etid) {
+        $.ajax({
+            type: "get",
+            url: "/api/exam",
+            data: {
+                compet: cModel.competId,
+                stage: cdid,
+                phone: uModel.userId
+            },
+            dataType: "json",
+            success: function (response) {
+                if (response.Status === 10001) {
+                    var result = response.Result[0];
+                    var templet = '本次活动每人限参与{{TOTAL}}次，您已经参与{{USED}}次。';
+                    switch (result.state) {
+                        case 1: {
+                            //参与次数已满
+                            templet += '您的最后成绩为:{{SCORE}}分。';
+                            templet = templet.replace('{{TOTAL}}', result.total)
+                                            .replace('{{USED}}', result.used)
+                                            .replace('{{SCORE}}', result.score);
+                            layerOpen(templet);
+                            break;
+                        }
+                        case 2: {
+                            //未获取比赛资格;
+                            templet = '对不起，你未参加上一轮比赛或未在上一轮比赛中胜出。';
+                            layerOpen(templet);
+                            break;
+                        }
+                        default: {
+                            //可以参赛
+                            templet += '目前最佳成绩为：{{SCORE}}分。是否继续答题？';
+                            templet = templet.replace('{{TOTAL}}', result.total)
+                                            .replace('{{USED}}', result.used)
+                                            .replace('{{SCORE}}', result.score);
+                            $.confirm('', templet, function () {
+                                window.location.href = '/Exam/Exam?examType=' + etid + '&competId=' + cModel.encId;
+                            });
+                        };
+                    }
+                }
+            }
+        });
+    }
+
+    function check(cdid, etid) {
+        $.ajax({
+            url: "@ConfigurationManager.AppSettings["API"]/API/Exam/Express",
+            //url: "@System.Configuration.ConfigurationManager.AppSettings["API"]/Admin/Content/WisdomCompet/CompetUsersCheck",
+            type: "post",
+            dataType: "json",
+            data: {
+                "head": {
+                    "method": "co.compet.competuserscheck",
+                    "app_id": "co001",
+                    "timestamp": "2017-09-20 14:30:00",
+                    "format": "json",
+                    "version": 1.0,
+                    "terminal_type": "web"
+                },
+                "param": {
+                    "compet_id": cModel.competId,
+                    "cd_id":cdid,
+                    "user_id": uModel.userId
+                }
+            },
+            //data: {
+            //compet_id: cModel.competId,
+            //cd_id: cdid,
+            //user_id: uModel.userId
+            //},
+            success: function (data) {
+            if (data === "True") {
+                doJoin(cdid, etid);
+            }else{
+                layerOpen("当前比赛人数已达上限！");
+                return;
+            }
+        }
+        });
+        }
+        //弹框
+        function layerOpen(allVal, fn) {
+            layer.open({
+                content: allVal,
+                btn: '确定',
+                yes: fn
+            });
+        }
+</script>

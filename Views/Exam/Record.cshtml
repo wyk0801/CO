@@ -1,0 +1,94 @@
+﻿@{
+    ViewBag.Title = "参考记录";
+    Layout = "~/Views/Shared/_ExamLayout.cshtml";
+}
+<div class="header my-header">
+    <ul>
+        <li class="border-b active"><a href="/Account/Mine?competId=@ViewBag.competId" class="return"><img src="/Content/images/return.png" alt="" /></a>考试记录</li>
+    </ul>
+</div>
+<div class="weui-tab" style="background:#475fa7;">
+    <div class="weui-tab__bd" style="background:url(/Content/images/img/bg1.png);background-size:100%;">
+        <div id="tab2" class="weui-tab__bd-item record weui-tab__bd-item--active">
+            <div class="k">
+                <img src="@ViewBag.avatar" alt="" />
+                <p style="margin-top:-0.1rem;">@ViewBag.userId</p>
+                <p>@ViewBag.realName</p>
+            </div>
+
+            <div class="weui-panel__bd" style="margin-bottom: 3rem;">
+            </div>
+        </div>
+    </div>
+    <input type="hidden" value="@ViewBag.QBank" id="qbank" />
+</div>
+<script src="~/Scripts/js/jquery-weui.js"></script>
+@*<script src="~/Script/lib/fastclick.js"></script>*@
+<script type="text/javascript">
+    $(function () {
+        //FastClick.attach(document.body);
+
+        $.ajax({
+            url: "GetTestRecord?competId=@ViewBag.competId",
+            type: "post",
+            async: false,
+            dataType: "json",
+            crossDomain: true == !(document.all),
+            success: function (data) {
+                var str = '';
+                if (data.length === 0) {
+                    str += '<div class="without"><img src="/Content/images/without.png" alt=""></div>';
+                    $("#Record").html("暂无考试记录");
+                } else {
+
+                    $(data).each(function (index, elm) {
+                        str += '<div class="big weui-cells"><div class="show weui-cell weui-cell_access">' + (index + 1) + '.' + elm.title + '</div><div class="hide">';
+
+                        $(elm.result).each(function (i, e) {
+                            if (i === elm.result.length - 1) {
+                                str += '<div class="weui-cells color_active"><a href="Paper?competIds=' + e.compet_id + '&cId=' + e.cd_id + '&competId=@ViewBag.competId"><div class="weui-cell plans"><div class="weui-cell__hd sort1"><img src="/Content/images/sai1.png" alt=""></div>';
+                                str += '<div class="infor"><p>' + e.state + '</p></div>';
+                                str += '<div class="infor"><p>' + e.iswin + '</p></div>';
+                                str += '<div><p>' + e.addtime + '</p></div>';
+                                str += '<div class="weui-cell__ft"><img src="/Content/images/return-right.png" alt=""></div></div></a></div>';
+                            } else {
+                                str += '<div class="weui-cells"><a href="Paper?competIds=' + e.compet_id + '&cId=' + e.cd_id + '&competId=@ViewBag.competId"><div class="weui-cell plans"><div class="weui-cell__hd sort1"><img src="/Content/images/sai1.png" alt=""></div>';
+                                str += '<div class="infor"><p>' + e.state + '</p></div>';
+                                str += '<div class="infor"><p>' + e.iswin + '</p></div>';
+                                str += '<div><p>' + e.addtime + '</p></div>';
+                                str += '<div class="weui-cell__ft"><img src="/Content/images/return-right.png" alt=""></div></div></a></div>';
+                            }
+                        });
+                        str += '</div></div>';
+                    });
+                }
+                $(".weui-panel__bd").append(str);
+            },
+            error: function () {
+
+            },
+            complete: function () {
+
+            }
+        });
+    });
+</script>
+<script type="text/javascript">
+    $(function () {
+        //$(".show").bind("click",
+        //    function () {
+        //        $(this).siblings().slideToggle(200).parent().siblings().children(".hide").slideUp(200);
+        //    });
+
+        $(".show")
+            .click(function () {
+                $(this).siblings().slideToggle(300).parent().siblings().children(".hide").slideUp(300);
+            });
+
+        var competId = "@ViewBag.competId";
+        if (competId === "6A3480BE00D093EF" || $("#qbank").val() === "0") {
+            $(".weui-bar__item3").attr("href", "");
+        }
+    });
+</script>
+

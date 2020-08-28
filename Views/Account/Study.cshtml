@@ -1,0 +1,118 @@
+﻿@model ChuanYuan.Model.compet
+@{
+    ViewBag.Title = "学习资料";
+    Layout = "~/Views/Shared/_ExamLayout.cshtml";
+}
+<script src="~/Content/login/js/jquery.placeholder.min.js"></script>
+<script>
+    $(function () {
+        $("input").placeholder();
+    });
+</script>
+<div class="header">
+    <ul>
+        <li class="border-b active">学习资料</li>
+    </ul>
+</div>
+<div class="weui-tab" style="background:#ffffff;">
+    <div class="weui-tab__bd" style="background:url(/Content/images/img/bg1.png);background-size:100%;">
+        <div id="tab3" class="weui-tab__bd-item weui-tab__bd-item--active">
+            <div class="height" style="height:0.88rem;"></div>
+            <div class="search-bg hide">
+                <div class="search">
+                    <input type="search" class="weui-search-bar__input" id="searchInput" placeholder="请输入关键字进行搜索" required="">
+                    <button id="searchBar"></button>
+                </div>
+            </div>
+            <div class="weui-panel__bd container" style="margin-bottom: 3rem;">
+
+            </div>
+        </div>
+    </div>
+    <div class="weui-tabbar weui-tabbar3 plan">
+        <a href="/Exam/Result?competId=@ViewBag.competId " class=" weui-tabbar__item weui-bar__item1">
+            <div class="weui-tabbar__icon"></div>
+        </a>
+        <a href="/Exam/Index?competId=@ViewBag.competId" class="weui-tabbar__item weui-bar__item2">
+            <div class="weui-tabbar__icon"></div>
+        </a>
+        <a href="/Account/Study?competId=@ViewBag.competId" class="weui-tabbar__item weui-bar__item3">
+            <div class="weui-tabbar__icon"></div>
+        </a>
+        <a href="/Account/Mine?competId=@ViewBag.competId" class="weui-tabbar__item weui-bar__item4">
+            <div class="weui-tabbar__icon"></div>
+        </a>
+    </div>
+</div>
+<script>
+    $(".search").click(function () {
+        $(this).toggleClass("search-copy");
+    })
+</script>
+<script src="~/Scripts/js/jquery-weui.js"></script>
+<script type="text/javascript">
+    var enQBase = '@Model.is_qbank';
+    $(document).ready(function () {
+        if (enQBase === '0') {
+            var array = [
+                '<div class="weui-msg" style="padding-top:2rem;">',
+                '<div class="weui-msg__icon-area"><img src="/Content/images/icon-book.png"/></div>',
+                '<div class="weui-msg__text-area">',
+                '<h2 class="weui-msg__title">学习资料未开启</h2>',
+                '<p class="weui-msg__desc">本次活动将不提供学习资料，全要靠平时对知识的积累哦！祝你取得好成绩吧.</p>',
+                '</div>',
+                '</div>'
+            ];
+            $(".container").html(array.join(''));
+        }else{
+            co_problems_list();
+        }
+    });
+    //if (competId !== "EBAB4009926AB811")
+    //加载学习资料数据
+    function co_problems_list(question) {
+        $.ajax({
+            url: "@System.Configuration.ConfigurationManager.AppSettings["API"]/API/Problems/Express",
+            type: "post",
+            async: false,
+            dataType: "json",
+            crossDomain: true == !(document.all),
+            data: {
+                "head": {
+                    "method": "co.problems.list",
+                    "app_id": "co001",
+                    "timestamp": "2017-03-30 14:3000",
+                    "format": "json",
+                    "version": 1.0,
+                    "terminal_type": "web"
+                },
+                "param": {
+                    "count": "500",
+                    "type_enum": "MultipleChoice",
+                    "question": question,
+                    "is_random": "false",
+                    "tags": "@ViewBag.tags"
+                }
+            },
+            success: function (data) {
+                var result = eval('(' + data + ')');
+                console.log(result);
+                var html = '<div class="weui-cells" style="margin-bottom: 3rem;margin-top:0;">';
+                $.each(result.param.data, function (index, value) {
+                    $.each(value.option, function (num, val) {
+                        if (val.isright == "yes") {
+                            html += '<div class="weui-cell">';
+                            html += '<div class="weui-cell__bd">';
+                            html += '<p>' + value.question + '</p>';
+                            html += '<div class="cell-bg">答案</div><span >' + val.value + '</span></div>';
+                            html += '<div class="line"><img src="/Content/images/line.png" alt=""></div></div>';
+                        }
+                    });
+                });
+                html += '</div>';
+                $(".container").html(html);
+            }
+        });
+    }
+</script>
+

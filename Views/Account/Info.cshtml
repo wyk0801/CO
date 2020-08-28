@@ -1,0 +1,135 @@
+﻿@{
+    ViewBag.Title = "完善信息";
+    Layout = "~/Views/Shared/_ExamLayout.cshtml";
+}
+
+<title>完善资料</title>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="description" content="Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description.
+    ">
+
+<link rel="stylesheet" href="~/Scripts/lib/weui.min.css">
+<link rel="stylesheet" href="~/Content/css/jquery-weui.css">
+<link rel="stylesheet" href="~/Content/css/demos.css">
+<link rel="stylesheet" href="~/Content/css/css.css">
+<link rel="stylesheet" href="~/Content/login/css/style.css">
+
+<link href="~/Content/css/layer.css" rel="stylesheet" />
+
+<!--[if IE]>
+<link rel="stylesheet" href="~/Contentcss/signup.css">
+<![endif]-->
+<script src="~/Scripts/js/jquery-1.11.3.min.js"></script>
+<script src="~/Content/login/js/jquery.placeholder.min.js"></script>
+<script src="~/Scripts/js/layer.min.js"></script>
+<script src="~/Scripts/js/jquery-weui.js"></script>
+
+<script>
+    $(function () {
+        $("input").placeholder();
+    });
+</script>
+
+
+
+<div class="header my-header">
+    <ul>
+        <li class="border-b active">完善资料</li>
+    </ul>
+</div>
+<div class="weui-tab">
+
+    <div class="weui-tab__bd">
+        <div id="tab4" class="weui-tab__bd-item weui-tab__bd-item--active">
+
+            <div class="k" style="margin-top: -1.6rem;"></div>
+
+            <div class="weui-panel__bd" style="margin-bottom: 3rem;">
+                <div class="my-form">
+                    <form action="#">
+                        <div class="common-div">
+                            <span class="name common-icon">
+                                <img src="~/Content/login/image/user.png" />
+                            </span>
+                            <input type="text" name="password" value="" placeholder="请输入姓名" id="realname" />
+                        </div>
+                        <div class="common-div">
+                            <span class="address common-icon">
+                                <img src="~/Content/login/image/name.png" />
+                            </span>
+                            <input type="text" name="address" value="" placeholder="请输入地址" id="address" />
+                        </div>
+                        <div class="sex" style="width: 5.1rem;">
+                            <div class="common">
+                                <input type="radio" id="cba" name="sport" value="cba">
+                                <label name="cba" for="cba"></label>
+                            </div>
+                            <div class="common2">
+                                <input type="radio" id="bba" name="sport" value="bba">
+                                <label name="bba" for="bba"></label>
+                            </div>
+                        </div>
+                        <div class="my-btn tj"></div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+<script type="text/javascript">
+    $(function () {
+
+        //弹框
+        function layerOpen(allVal) {
+            layer.open({
+                content: allVal,
+                btn: '确定'
+            });
+        }
+
+        $(".tj").click(function () {
+            var name = $("#realname").val();
+            var address = $("#address").val();
+            var sex = "男";
+            if ($.trim(name) == "") {
+                layerOpen('姓名不能为空!');
+                return;
+            }
+            if ($.trim(address) == "") {
+                layerOpen('地址不能为空!');
+                return;
+            }
+            if (!$("#cba").is(":checked") && !$("#bba").is(":checked")) {
+                layerOpen('请选择性别');
+                return;
+            }
+            else {
+                if ($("#bba").is(":checked")) {
+                    sex = "女";
+                }
+            }
+            $.ajax({
+                type: "POST",
+                url: "/Account/AddInfo",
+                dataType: "json",
+                data: { competId: "@ViewBag.competId", name: name, sex: sex, address: address },
+                success: function (data) {
+                    if (data == "成功") {
+                        $.alert("", "信息完善成功", function () {
+                            location.href = "/Exam/Index?competId=@ViewBag.competId";
+                        });
+                        return;
+                    }
+                    location.href = "/Exam/Index?competId=@ViewBag.competId";
+                }
+            });
+        })
+    });
+</script>
+
+

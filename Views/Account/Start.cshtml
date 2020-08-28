@@ -1,0 +1,112 @@
+﻿@using ChuanYuan.Model
+@{
+    ViewBag.Title = "启动页";
+    Layout = "~/Views/Shared/_ExamLayout.cshtml";
+}
+@model compet
+<style type="text/css">
+        .weui-tab{
+            width: 100%;
+            background:#fbfbfb;
+        }
+        .weui-tab img{
+            width: 100%;
+        }
+        .weui-tab p{
+            text-align: center;
+            font-size: 0.34rem;
+            color: #fff;
+        }
+        .weui-tab .lib{
+            position: absolute;
+            top:2.45rem;
+            right: 1.1rem;
+            width: 5.15rem;
+        }
+        #form1{
+            width: 80px;
+            height: 28px;
+            line-height: 28px;
+            text-align: center;
+            color:#fff;
+        }
+        .introduce{
+            position:absolute;
+            top:10.4rem;
+            left:2.75rem;
+            width:2.0rem;
+        }
+        .introduce img{
+            width:100%;
+            margin-top:0;
+        }
+    .weui-dialog{
+        width:90%;
+        background:#fff;
+        border-radius:10px;
+        height:auto;
+        padding-bottom:10px;
+        text-align:left;
+    }
+    .weui-dialog__hd{
+        margin:0;
+        text-align:center;
+    }
+    .weui-dialog__title{
+        color:#333;
+    }
+    .weui-dialog__bd{
+        height:300px;
+        color:#999;
+        overflow-x:hidden;
+        overflow-y:auto;
+    }
+    .weui-dialog__ft{
+        height:1rem;
+    }
+    .weui-dialog .weui-dialog__btn.primary{
+        left:50%;
+        margin-left:-0.85rem;
+        text-align:center;
+    }
+</style>
+<div class="weui-tab">
+    <img src="@(string.IsNullOrEmpty(Model.cover) ? "/Content/login/image/start.jpg" : System.Configuration.ConfigurationManager.AppSettings["API"]+Model.cover)" alt="线上竞赛平台" style="display:block;position:absolute;top:0rem;" alt="">
+    <div class="lib">
+        <p>@Model.group_name</p>
+    </div>
+    <a href="javascript:;" id="show-alert">
+        <div class="introduce">
+            <img src="/content/login/image/duce.png" alt="Alternate Text"/>
+        </div>
+    </a>
+    <a href="http://192.168.1.120/Home/Login?redirect_url=http%3a%2f%2f192.168.1.120%3a8018%2fAccount%2fLogin">
+        <div id="btn" style="position: absolute; top: 7.88rem; right: 2.25rem; width: 3.10rem; height: 1.20rem;">
+            <img src="/content/login/image/show.png" alt="Alternate Text" style="margin-top: 0;" />
+        </div>
+    </a>
+    <input type="hidden" id="hidhtml" value="@Html.Raw(Model.contents)" />
+</div>
+<script src="~/Scripts/js/jquery-weui.js"></script>
+<script>
+    $(document).on("click", "#show-alert", function () {
+        $.alert($("#hidhtml")[0].value, '@Model.title');
+    });
+    $(document).ready(function () {
+        var cover = '@Model.cover';
+        if (cover !== '') {
+            $('.lib')[0].style.display = 'none';
+            $('.introduce')[0].style.top = '12.2rem';
+            $('#btn')[0].style.top = '10.88rem';
+        }
+    });
+    var compet = {
+        competId: '@Model.compet_id',
+        competTitle: '@Model.title',
+        competSubTitle: '@Model.sub_title',
+        libraryName: '@Model.group_name',
+        libraryId:'@Model.group_id',
+        encId: '@ViewBag.EncId'
+    }
+    localStorage.setItem('competModel', JSON.stringify(compet));
+</script>

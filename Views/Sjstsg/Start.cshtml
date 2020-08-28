@@ -1,0 +1,125 @@
+﻿
+<!DOCTYPE html>
+<html>
+<head>
+    <title>上海少年儿童图书馆</title>
+    <meta charset="utf-8">
+    <link href="~/Scripts/lib/weui.min.css" rel="stylesheet" />
+    <link href="~/Content/css/jquery-weui.css" rel="stylesheet" />
+    <link href="~/Content/css/css.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/Content/login/css/style.css">
+    <style type="text/css">
+        html,body{height:100%;}
+        .weui-tab {
+            width: 100%;
+            background: #99ebff;
+        }
+
+        .weui-tab img {
+            width: 100%;
+        }
+
+        .weui-tab p {
+            text-align: center;
+            font-size: 0.34rem;
+            color: #fff;
+        }
+
+        .weui-tab .lib {
+            position: absolute;
+            top: 1.35rem;
+            right: 0.86rem;
+            width: 5.74rem;
+        }
+
+        #form1 {
+            width: 80px;
+            height: 28px;
+            line-height: 28px;
+            text-align: center;
+            color: #fff;
+        }
+
+        .introduce {
+            position: absolute;
+            top: 4.2rem;
+            left: 1.2rem;
+            width: 5.18rem;
+        }
+
+        .introduce img {
+            width: 100%;
+            margin-top: 0;
+        }
+
+        .weui-dialog {
+            width: 90%;
+            background: #fff;
+            border-radius: 10px;
+            height: auto;
+            padding-bottom: 10px;
+            text-align: left;
+        }
+
+        .weui-dialog__hd {
+            margin: 0;
+            text-align: center;
+        }
+
+        .weui-dialog__bd {
+            height: 300px;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .weui-dialog__ft {
+            height: 1rem;
+        }
+
+        .weui-dialog .weui-dialog__btn.primary {
+            left: 50%;
+            margin-left: -0.85rem;
+            text-align: center;
+        }
+        .link{
+            display:block;
+            position:absolute;
+            right:0.48rem;
+            top:0.3rem;
+            color:#fff;
+            font-size:14px;
+        }
+    </style>
+</head>
+<body ontouchstart>
+    <div class="weui-tab">
+        <a class="link" href="/" onclick="history.go(-1)" style="opacity: 1;">跳过<span id="sec"></span></a>
+        <img src="/Content/login/image/logo.png" alt="线上竞赛平台" style="display:block;position:absolute;top:0.22rem;left:0.26rem;width:2.57rem" alt="">
+        <div class="lib">
+            <img src="~/Content/login/image/sjslogo.png" alt="Alternate Text" />
+        </div>
+        <a id="show-alert"><div class="introduce"><img src="/content/login/image/sjsimg.png" alt="Alternate Text" /></div></a>
+        <a href="/Exam/Index?competId=@ViewBag.CompetId">
+            <div id="btn" style="position: absolute;top:9.25rem;right: 1.9rem;width:3.70rem;height:1.20rem;"><img src="/content/login/image/show.png" alt="Alternate Text" style="margin-top:0;" /></div>
+        </a>
+    </div>
+   
+    <script type="text/javascript">
+        //设定倒数秒数
+        var t = 10;
+        //显示倒数秒数
+        function showTime() {
+            t -= 1;
+            document.getElementById('sec').innerHTML = t;
+            if (t == 0) {
+                window.location.href = "/Exam/Index?competId=@ViewBag.CompetId";
+            }
+            //每秒执行一次,showTime()
+            setTimeout("showTime()", 1000);
+        }
+        //执行showTime()
+        showTime();
+    </script>
+    <script src="~/Scripts/js/jquery-1.11.3.min.js"></script> 
+</body>
+</html>

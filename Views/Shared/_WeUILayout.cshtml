@@ -1,0 +1,21 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href="/Content/weui/weui.min.css">
+    <link rel="stylesheet" href="/Content/weui/jquery-weui.min.css">
+    @RenderSection("styles", false)
+</head>
+<body>
+    @RenderBody()
+    <script src="/Content/weui/jquery-2.1.4.js"></script>
+    <script src="/Content/weui/jquery-weui.min.js"></script>
+    @RenderSection("scripts", false)
+</body>
+</html>

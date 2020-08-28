@@ -1,0 +1,479 @@
+﻿@using System.Configuration
+@using ChuanYuan.Common
+@{
+    ViewBag.Title = "竞赛页面";
+    Layout = "~/Views/Shared/_ExamLayout.cshtml";
+}
+
+<style type="text/css">
+    input[type=radio] {
+        visibility: hidden;
+    }
+
+    .weui-media-box__desc {
+        position: relative;
+        line-height: 0.40rem;
+        margin-top: -0.10rem;
+        margin-bottom: 0.2rem;
+    }
+
+        .weui-media-box__desc label {
+            cursor: pointer;
+        }
+
+            .weui-media-box__desc label:after {
+                opacity: 0;
+                content: '';
+                position: absolute;
+                top: 0.02rem;
+                left: -0.02rem;
+                width: 0.36rem;
+                height: 0.30rem;
+                background: url(/Content/images/ture.png) no-repeat;
+                background-size: 100%;
+            }
+
+        .weui-media-box__desc input[type=radio]:checked + label:after {
+            opacity: 1;
+        }
+
+    .box-wait {
+        float: left;
+        width: 0.36rem;
+    }
+
+    .next nexttj {
+        cursor: pointer;
+    }
+
+    .next {
+        cursor: pointer;
+    }
+</style>
+<div class="header">
+    <ul>
+        <li class="border-b active">
+            <a href="javascript:;" id='show-confirm' class="return"><img src="/Content/images/return.png" alt="" /></a>
+            <img src="/Content/images/header2.png" class="t1 t2" alt="">正在参赛
+        </li>
+    </ul>
+</div>
+<div class="weui-tab">
+    <div class="weui-tab__bd">
+        <div id="tab4" class="weui-tab__bd-item weui-tab__bd-item--active">
+            <div class="weui-panel__bd" style="margin-bottom: 3rem;">
+                <div class="height" style="height:0.88rem;"></div>
+                <div class="time">
+                    <div class="weui-progress" style="position:relative">
+                        <p style="margin-right: 0.3rem;">时间</p>
+                        <div class="weui-progress__bar" style="width:2.90rem;">
+                            <div class="weui-progress__inner-bar js_progress" style="width: 80%;float: left;"></div>
+                        </div>
+                        <p id="clock"></p>
+                        <span id="qnum" style="margin-left:1.5rem;"></span>
+                    </div>
+                </div>
+                <div class=""><div class="content" style="padding-top:0rem;"></div></div>
+            </div>
+        </div>
+    </div>
+    <div class="weui-tabbar weui-tabbar2 plan">
+        <a href="javascript:void(0);" class="weui-tabbar__item weui-bar__item1">
+            <div class="weui-tabbar__icon"></div>
+        </a>
+        <a href="javascript:void(0);" class="weui-tabbar__item weui-bar__item2">
+            <div class="weui-tabbar__icon"></div>
+        </a>
+        <a href="javascript:void(0);" class="weui-tabbar__item weui-bar__item3">
+            <div class="weui-tabbar__icon"></div>
+        </a>
+        <a href="javascript:void(0);" class="weui-tabbar__item weui-bar__item4">
+            <div class="weui-tabbar__icon"></div>
+        </a>
+        
+    </div>
+    <input type="hidden" value="@ViewBag.QBank" id="qbank" />
+</div>
+<script src="~/Scripts/lib/jquery-2.1.4.js"></script>
+<script src="~/Scripts/lib/fastclick.js"></script>
+@*<script>
+        $(function () {
+            FastClick.attach(document.body);
+        });
+    </script>*@
+<script src="~/Scripts/js/jquery-weui.js"></script>
+<script src="~/Scripts/js/jquery.compet.cykj.js"></script>
+<script type="text/javascript">
+    var ansList = [];
+    var testTime, answerTime;;
+    $(function () {
+        Init("@Model.exam_type");
+        question();
+        calculate();
+    });
+    function calculate() {
+        $.ajax({
+            url: "@ConfigurationManager.AppSettings["API"]/API/Exam/Express",
+            type: "post",
+            async: true,
+            dataType: "json",
+            crossDomain: true == !(document.all),
+            data: {
+                "head": {
+                    "method": "co.compet.calculate",
+                    "app_id": "co001",
+                    "timestamp": "2017-09-20 14:30:00",
+                    "format": "json",
+                    "version": 1.0,
+                    "terminal_type": "web"
+                },
+                "param": {
+                    "compet_id": "@Model.compet_id",
+                    "cd_id": "@Model.cd_id"
+                }
+            },
+            success: function (data) {
+            },
+            error: function (data) {
+            }
+        });
+    }
+
+    function question() {
+        $.ajax({
+            url: "@ConfigurationManager.AppSettings["API"]/API/Exam/Express",
+            type: "post",
+            async: false,
+            dataType: "json",
+            crossDomain: true == !(document.all),
+            data: {
+                "head": {
+                    "method": "co.compet.examlist",
+                    "app_id": "co001",
+                    "timestamp": "2017-03-30 14:3000",
+                    "format": "json",
+                    "version": 1.0,
+                    "terminal_type": "web"
+                },
+                "param": {
+                    "compet_id": "@Model.compet_id",
+                    "exam_type": "@Model.exam_type",
+                    "user_id": "@ViewBag.userId",
+                    "tags": "@Model.tags"
+                }
+            },
+            success: function (data) {
+                var paper = eval('(' + data + ')').param;
+                testTime = paper.test_time;
+                $("#qnum").append("<span>1/</span>" + paper.question_amount);
+                var html = '';
+                $.each(paper.qlist, function (index, value) {
+
+                    html += '<div class="quescontent" style="display:none"><div class="questions" qid=' + value.question_id + '><div class="weui-media-box__desc weui-media-box__tm">' + (index + 1) + '.' + value.question + '</div>';
+                    html += '<div class="weui_cells weui_cells_radio">';
+                    $.each(value.option, function (num, val) {
+                        var aid = '';
+                        if (val.isright == "no") {
+                            aid = 'aid = "1"';
+                        } else {
+                            aid = 'aid = "2"';
+                        }
+
+                        html += '<div class="weui-media-box__desc"><input type="radio" ' + aid + ' id="a' + index + '' + num + '" name="sport" value="a">';
+                        html += '<label name="a' + index + '' + num + '" for="a' + index + '' + num + '"><img src="/Content/images/wait.png" class="box-wait">' + val.value + '</label></div>';
+                    });
+
+                    if (index == paper.question_amount - 1) {
+                        html += '</div></div><div class="next nexttj"></div></div>';
+                    } else {
+                        html += '</div></div><div class="next"></div></div>';
+                         
+                    }
+                });
+                //html += '<a onClick="javascript :history.back(-1);">返回上一页</a>';
+                $(".content").append(html);
+                $(".quescontent").eq(0).removeAttr("style");
+            }
+        });
+    }
+
+    //倒计时
+    $(function () {
+        var leftTimes = new Date().getTime() + testTime * 60 * 1000;
+        var leftTime;
+        answerTime = 0;
+        var countdown = function displayTime() {
+            var elt = document.getElementById("clock");
+            if (leftTime <= 0) {
+                elt.innerHTML = "Over";
+                answerTime = testTime * 60;
+
+                //if (ansList.length - 1 == count) {
+                //    ansList.splice(ansList.length - 1, 1)
+                //}
+
+                var anlistnum = ansList.length - 1;
+                $(".questions").each(function (index, value) {
+                    if (index > anlistnum) {
+                        var ques = { question_id: $(this).attr("qid"), my_answer: "0", is_right: "false" };
+                        ansList.push(ques);
+                    }
+                });
+                //examSub(false);
+
+                $.alert("", formatName("@Model.exam_type", "3") + "考试时间到了，自动提交试卷！", function () {
+                    //点击确认后的回调函数
+                    location.replace("/Exam/Index?competId=@ViewBag.competId");
+                    //  location.href = "/Exam/Index?competId=@ViewBag.competId";
+                });
+
+                clearTimeout(countdown);
+            }
+            else {
+                var now = new Date();
+
+                leftTime = leftTimes - now.getTime();
+
+                var ms = parseInt(leftTime % 1000).toString();
+                leftTime = parseInt(leftTime / 1000);
+                var o = Math.floor(leftTime / 3600);
+                var d = Math.floor(o / 24);
+                var m = Math.floor(leftTime / 60 % 60);
+                var s = leftTime % 60;
+
+                var rate = leftTime / (testTime * 60);
+
+                $(".js_progress").attr("style", "width: " + rate * 100 + "%");
+
+                if (o == 0) {
+                    elt.innerHTML = m + "分:" + s + "秒";
+                } else {
+                    elt.innerHTML = o + "小时:" + m + "分:" + s + "秒";
+                }
+                answerTime = answerTime + 0.1;
+
+                setTimeout(displayTime, 100);
+            }
+        }
+        countdown();
+    });
+
+    $(document).on("click", "[name=sport]", function () {
+        $(this).parent().parent().parent().next().attr("aid", $(this).attr("aid"));
+        $(this).parent().parent().parent().next().attr("cid", $(this).parent().index() + 1);
+    });
+
+    $(document).on("click", ".nexttj", function () {
+
+        //examSub(true);
+    });
+
+    $(document).on("click", ".next", function () {
+        if ($(this).attr("cid") == undefined) {
+            $.alert("", "请完成题目做答");
+            return false;
+        };
+
+        //选项的父元素
+        var el = $(this).parent();
+
+        //最后一题的索引号
+        var lindex = el.index();
+        //题目总数
+        var count = el.parent().children("div").length - 1;
+        //所选选项
+
+        if (lindex != count) {
+            $("#qnum").empty();
+            $("#qnum").append("<span>" + (lindex + 2) + "/" + "</span>" + (count + 1));
+        }
+
+        var isr = "false";
+        var ism = "0";
+        if ($(this).attr("aid") == "2") isr = "true";
+
+        //重复提交最后一题，删除数组的最后一列
+        // if (ansList.length - 1 == count) {
+        //     ansList.splice(ansList.length - 1, 1)
+        // }
+        var ques = { question_id: el.children().eq(0).attr("qid"), my_answer: $(this).attr("cid"), is_right: isr };
+
+        ansList.push(ques);
+        //答题后隐藏
+        if (lindex != count) {
+            setTimeout(function () {
+                el.attr("style", "display:none;");
+                //el.next().attr("style", "display:none;");
+                el.next().removeAttr("style");
+            }, "150"); //150毫秒后执行函数，只执行一次。
+        } else {
+            examSub(true)
+        }
+    });
+
+    //信息填写完成后跳转到登录页面
+    function layerOpen(allVal) {
+        $.confirm("标题", function () {
+            //点击确认后的回调函数
+            //$.alert("点击确认后的回调函数");
+            location.href = "/Exam/Index";
+        }, function () {
+            //点击取消后的回调函数
+            //$.alert("点击取消后的回调函数");
+
+        });
+
+        //$.confirm({
+        //    title: '标题',
+        //    text: '内容文案',
+        //    onOK: function () {
+        //        //点击确认
+        //    },
+        //    onCancel: function () {
+        //    }
+        //});
+    }
+
+    function examSub(flag) {
+        $.ajax({
+            url: "@ConfigurationManager.AppSettings["API"]/API/Exam/Express",
+            type: "post",
+            async: false,
+            dataType: "json",
+            crossDomain: true == !(document.all),
+            data: {
+                "head": {
+                    "method": "co.compet.subpaper",
+                    "app_id": "co001",
+                    "timestamp": "2017-03-30 14:3000",
+                    "format": "json",
+                    "version": 1.0,
+                    "terminal_type": "web"
+                },
+                "param": {
+                    "cd_id": "@Model.cd_id",
+                    "user_id": "@ViewBag.userId",
+                    "compet_id": "@Model.compet_id",
+                    "exam_type": "@Model.exam_type",
+                    "paper_answer": JSON.stringify(ansList),
+                    "begin_time": "@Model.begin_time",
+                    "end_time": "@Model.end_time",
+                    "used_time": answerTime
+                }
+            },
+            success: function (data) {
+                var head = eval('(' + data + ')').head;
+                if (head.code === "200") {
+                    if (flag) {
+                        var jsonInfo = JSON.parse(head.msg), mesInfo = "", fInfo = "", sInfo = "", tInfo = "", lInfo = "";
+                        if (jsonInfo.unit === "Score") {
+                            if (jsonInfo.score >= jsonInfo.sillscore) {
+                                fInfo = "恭喜你,";
+                                if (!jsonInfo.nextflag) {
+                                    lInfo = ",速速参加下一轮";
+                                }
+                            }
+                            else {
+                                fInfo = "很遗憾,";
+                            }
+                            sInfo = ",当前最佳排名第" + jsonInfo.rank + "名";
+                            if (jsonInfo.jointime < 99) {
+                                tInfo = ",剩余" + jsonInfo.lastnum + "次答题";
+                            }
+                            mesInfo = fInfo + "本次成绩" + jsonInfo.score + "分" + sInfo + tInfo + lInfo;
+                        } else {
+                            mesInfo = "恭喜你已经答完了，请耐心等待发榜结果吧！发榜时间：@Convert.ToDateTime(Model.end_time).ToString("yyyy-MM-dd HH:mm:ss")";
+                        }
+                        $.confirm("", "<div>" + mesInfo + "</div>", function () {
+                            location.replace("/Exam/Index?competId=@ViewBag.competId");
+                        }, function () {
+                            location.replace("/Exam/Index?competId=@ViewBag.competId");
+                        });
+                    }
+                } else {
+                    //layerOpen(head.msg);
+                    $.confirm("", "<div>" + head.msg + "</div>", function () {
+                        location.replace("/Exam/Index?competId=@ViewBag.competId");
+                    }, function () {
+                        //取消操作
+                    });
+                }
+            }
+        });
+    }
+
+    $(document).on("click", "#show-confirm", function () {
+        $.confirm("",
+            "你还没有完成本次科考，确定要放弃本次高中机会吗？",
+            function () {
+                location.replace("/Exam/Index?competId=@ViewBag.competId");
+                //location.href = "/Exam/Index?competId=@ViewBag.competId";
+            },
+            function () {
+                //取消操作
+            });
+    });
+
+    $(".weui-tabbar__item").eq(0).on("click",
+        function () {
+            $.confirm("",
+                "你还没有完成本次科考，确定要放弃本次高中机会吗？",
+                function () {
+                    location.replace("/Exam/Result?competId=@ViewBag.competId");
+                    @*location.href = "/Exam/Result?competId=@ViewBag.competId";*@
+                },
+                function () {
+                    //取消操作
+                });
+        });
+
+    $(".weui-tabbar__item").eq(1).on("click",
+        function () {
+            $.confirm("",
+                "你还没有完成本次科考，确定要放弃本次高中机会吗？",
+                function () {
+                    location.replace("/Exam/Index?competId=@ViewBag.competId");
+                    @*location.href = "/Exam/Index?competId=@ViewBag.competId";*@
+                },
+                function () {
+                    //取消操作
+                });
+        });
+
+    $(".weui-tabbar__item").eq(2).on("click",
+        function () {
+            $.confirm("",
+                "你还没有完成本次科考，确定要放弃本次高中机会吗？",
+                function () {
+                    if ($("#qbank").val() === "0") {
+                        location.replace("/Exam/Index?competId=@ViewBag.competId");
+                        return;
+                    }
+                    else
+                        location.replace("/Account/Study?competId=@ViewBag.competId");
+                    //location.href = "/Account/Study?competId=@ViewBag.competId";
+                },
+                function () {
+                    //取消操作
+                });
+        });
+
+    $(".weui-tabbar__item").eq(3).on("click",
+        function () {
+            $.confirm("",
+                "你还没有完成本次科考，确定要放弃本次高中机会吗？",
+                function () {
+                    location.replace("/Account/Mine?competId=@ViewBag.competId");
+                    // location.href = "/Account/Mine?competId=@ViewBag.competId";
+                },
+                function () {
+                    //取消操作
+                });
+        });
+
+
+</script>
+@*<script src="~/Scripts/js/zstsg.js"></script>
+    <script>
+        InitZstsg.postzs("@ConfigurationManager.AppSettings["API"]",@Model.compet_id,@Session[Keys.SESSION_USER_INFO]);
+    </script>*@

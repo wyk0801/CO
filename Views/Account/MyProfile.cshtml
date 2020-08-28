@@ -1,0 +1,375 @@
+﻿@{
+    ViewBag.Title = "我的资料";
+    Layout = "~/Views/Shared/_ExamLayout.cshtml";
+}
+<script src="~/Content/login/js/jquery.placeholder.min.js"></script>
+<script>
+    $(function () {
+        $("input").placeholder();
+    });
+</script>
+<link href="~/Content/css/area.css" rel="stylesheet" />
+<script src="~/Scripts/js/layer.min.js"></script>
+<link href="~/Content/css/layer.css" rel="stylesheet" />
+@*<script src="~/Script/lib/fastclick.js"></script>*@
+<script src="~/Scripts/js/jquery-weui.js"></script>
+<script type="text/javascript">
+    var bphone;
+    var allVal;
+    $(function () {
+        GetFormItem();
+
+        //FastClick.attach(document.body);
+        //弹框
+        function layerOpen(allVal) {
+            layer.open({
+                content: allVal,
+                btn: '确定'
+            });
+        }
+
+        // 绑定图书馆
+        $.ajax({
+            type: "POST",
+            url: "GetLibrarys",
+            dataType: "json",
+            async: false,
+            success: function (d) {
+                $("#library").select({
+                    title: "选择图书馆",
+                    items: d
+                });
+            }
+        });
+
+        //保存成功跳转页面
+        function layerOpen1() {
+            layer.open({
+                type: 2
+                   , content: '保存成功！'
+                   , time: 1,
+                end: function () {
+                    location.href = "/Account/Mine?competId=@ViewBag.competId";
+                }
+            });
+        }
+        var Eunit = true;
+        //点击提交数据
+        $("#DataDatum").click(function () {
+            var groupId = $("#cityid").val();
+            if (groupId == "{$cityid}") {
+                groupId = $("#cityid").attr("data-values");
+            }
+            var homecityName = $("#homecity_name").val();          
+            var mobilePhone = $('#phone').val();
+            var name = $('#name').val();
+
+            //获取表单值
+            var titlelist = '';
+            var vallist = '';
+            var idlist = '';
+            $.each($("input[name=listpicker]"),
+                function (index, value) {
+                    titlelist += $(value).attr("title") + ',';
+                    vallist += value.value + ',';
+                    idlist += $(value).attr("iid") + ',';
+                });
+            $.each($("input[name=datepicker]"),
+                function (index, value) {
+                    titlelist += $(value).attr("title") + ',';
+                    vallist += value.value + ',';
+                    idlist += $(value).attr("iid") + ',';
+                });
+            $.each($("input[name=textpicker]"),
+                function (index, value) {
+                    titlelist += $(value).attr("title") + ',';
+                    vallist += value.value + ',';
+                    idlist += $(value).attr("iid") + ',';
+                });
+            $.each($("input[name=numberpicker]"),
+                function (index, value) {
+                    titlelist += $(value).attr("title") + ',';
+                    vallist += value.value + ',';
+                    idlist += $(value).attr("iid") + ',';
+                });
+            if (Eunit) {
+                $.ajax({
+                    type: "POST",
+                    url: "MyProfile",
+                    dataType: "json",
+                    async: true,
+                    data: { groupId: groupId, mobilePhone: mobilePhone, realName: name, competId: "@ViewBag.competId" },
+                    success: function (data) {
+                        if (data == 1) {
+                            layerOpen1();
+                            $.ajax({
+                                url:
+                                    "@System.Configuration.ConfigurationManager.AppSettings["API"]/API/Account/Express",
+                                type: "post",
+                                dataType: 'json',
+                                async: true,
+                                crossDomain: true,
+                                data: {
+                                    "head": {
+                                        "method": "co.users.updateuserformvalue",
+                                        "app_id": "co001",
+                                        "timestamp": "2017-03-30 14:3000",
+                                        "format": "json",
+                                        "version": 1.0,
+                                        "terminal_type": "web"
+                                    },
+                                    "param": {
+                                        "user_id": mobilePhone,
+                                        "password": "",
+                                        "email": "",
+                                        "avatar": "@ViewBag.avatar",
+                                        "realName": name,
+                                        "gender": "",
+                                        "birthday": "",
+                                        "mobile_phone": mobilePhone,
+                                        "province_id": 9,
+                                        "city_id": 73,
+                                        "school": "",
+                                        "grade": "",
+                                        "classes": "",
+                                        "units": "@ViewBag.libname", //$("#homecity_name").val(),
+                                        "address": "",
+                                        "group_id": "@ViewBag.lib", //$("#cityid").val(),
+                                        "compet_id": "@ViewBag.competId",
+                                        "form": titlelist + "#" + vallist + "#" + idlist
+                                    }
+
+                                }
+
+                            });
+                            
+                        } else if (data == 3) {
+                            allVal = '该手机号码已经被绑定!';
+                            layerOpen(allVal);
+                        } else if (data == 4) {
+                            allVal = '姓名格式不正确!';
+                            layerOpen(allVal);
+                        } else if (data == 5) {
+                            allVal = '手机格式不正确!';
+                            layerOpen(allVal);
+                        } else if (data == 6) {
+                            allVal = '姓名不能超过四位!';
+                            layerOpen(allVal);
+                        }
+                        else {
+                            allVal = '保存失败!';
+                            layerOpen(allVal);
+                        }
+                    }
+                });
+            } else {
+                $("#homecity_name").parent().next()[0].innerText = '图书馆未找到!';
+            }
+      
+        });
+    });
+    function GetFormItem() {
+        $.ajax({
+            type: "POST",
+            url: "LoadFormUser?id=@ViewBag.competId",
+            dataType: "json",
+            async: false,
+            success: function (data) {
+                var html = '';
+                $.each(data, function (index, value) {
+                    switch (value.data_type) {
+                        case "List":
+                            html += '<div class="common-div"><span class="common-icon">';
+                            html += '<img src="/Content/login/image/common.png" /></span>';
+                            html += '<input type="text" name="listpicker" onBlur="listb(this)" id="list' +
+                                index +
+                                '" title="' +
+                                value.title +
+                                '" iid="' +
+                                value.item_id +
+                                '" source="' +
+                                value.data_source +
+                                '" ';
+                            html += 'key="' +
+                                value.title +
+                                '" req="' +
+                                value.is_required +
+                                '" data_length="' +
+                                value.data_length +
+                                '" pattern="' +
+                                value.valid_pattern +
+                                '" errtip="' +
+                                value.valid_error_msg +
+                                '" placeholder="' +
+                                value.valid_tip_msg +
+                                '" value="' + value.item_value +
+                                '" /></div>';
+                            html += '<div class="vae"></div>';
+                            break;
+                        case "Date":
+                            html += '<div class="common-div"><span class="common-icon">';
+                            html += '<img src="/Content/login/image/common.png" /></span>';
+                            html += '<input type="text" name="datepicker" onBlur="dateb(this)" id="datepicker' +
+                                index +
+                                '" title="' +
+                                value.title +
+                                '" iid="' +
+                                value.item_id +
+                                '" ';
+                            html += 'key="' +
+                                value.title +
+                                '" req="' +
+                                value.is_required +
+                                '" data_length="' +
+                                value.data_length +
+                                '" pattern="' +
+                                value.valid_pattern +
+                                '" errtip="' +
+                                value.valid_error_msg +
+                                '" placeholder="' +
+                                value.valid_tip_msg +
+                                '" value="' + value.item_value +
+                                '"></div>';
+                            html += '<div class="vae"></div>';
+                            break;
+                        case "Text":
+                            html += '<div class="common-div"><span class="common-icon">';
+                            html += '<img src="/Content/login/image/common.png" /></span>';
+
+                            if (value.data_length.is_password) {
+                                html += '<input type="password" name="textpicker" id="text' +
+                                    index +
+                                    '" title="' +
+                                    value.title +
+                                    '" iid="' +
+                                    value.item_id +
+                                    '" ';
+                            } else {
+                                html += '<input type="text" name="textpicker"  id="text' +
+                                    index +
+                                    '" title="' +
+                                    value.title +
+                                    '" iid="' +
+                                    value.item_id +
+                                    '" ';
+                            }
+
+                            html += 'key="' +
+                                value.title +
+                                '" req="' +
+                                value.is_required +
+                                '" data_length="' +
+                                value.data_length +
+                                '" pattern="' +
+                                value.valid_pattern +
+                                '" errtip="' +
+                                value.valid_error_msg +
+                                '" placeholder="' +
+                                value.valid_tip_msg +
+                                '" value="' + value.item_value +
+                                '" /></div>';
+                            html += '<div class="vae"></div>';
+                            break;
+                        case "Number":
+                            html += '<div class="common-div"><span class="common-icon">';
+                            html += '<img src="/Content/login/image/common.png" /></span>';
+                            html += '<input type="text" name="numberpicker" onBlur="numberb(this)" id="number' +
+                                index +
+                                '" title="' +
+                                value.title +
+                                '" iid="' +
+                                value.item_id +
+                                '" ';
+                            html += 'key="' +
+                                value.title +
+                                '" req="' +
+                                value.is_required +
+                                '" data_length="' +
+                                value.data_length +
+                                '" pattern="' +
+                                value.valid_pattern +
+                                '" errtip="' +
+                                value.valid_error_msg +
+                                '" placeholder="' +
+                                value.valid_tip_msg +
+                                '" value="' + value.item_value +
+                                '" /></div>';
+                            html += '<div class="vae"></div>';
+                            break;
+                        default:
+                    }
+                });
+                $("#name").parent().next().after(html);
+            }
+        });
+    }
+</script>
+
+<div class="header my-header">
+    <ul>
+        <li class="border-b active"><a href="/Account/Mine?competId=@ViewBag.competId" class="return"><img src="~/Content/images/return.png" alt="" /></a>我的资料</li>
+    </ul>
+</div>
+<div class="weui-tab" style="background:#475fa7;">
+    <div class="weui-tab__bd" style="background:url(/Content/images/img/bg1.png);background-size:100%;">
+        <div id="tab2" class="weui-tab__bd-item weui-tab__bd-item--active">
+            <div class="k">
+                <img src="@Model.avatar" alt="" />
+                <p style="margin-top:-0.1rem;">@ViewBag.userId</p>
+            </div>
+
+            <div class="weui-panel__bd" style="margin-bottom: 3rem;">
+                <div class="my-form my-profile">
+                    <form action="#">
+                        <div class="user-name common-div">
+                            <span>姓名</span>
+                            @*<p>@ViewBag.userId</p>*@
+                            <input id="userId" name="userId" value="@ViewBag.userId" readonly="readonly" />
+                        </div>
+                        <div class="libary common-div" style="display:none;">
+                            <span class="libary common-icon">
+                                图书馆
+                            </span>
+                            <input type="text" value="@ViewBag.GroupName" size="15" id="homecity_name" name="homecity_name" mod="address|notice" mod_address_source="hotel" mod_address_reference="cityid" placeholder="图书馆名称" />
+                            <input id="hid_competid" name="hid_competid" type="hidden" value="@ViewBag.competId" />
+                            <input id="cityid" name="cityid" type="hidden" value="{$cityid}" data-values="@ViewData["groupId"]" />
+                            @*<input id="library" name="library" value="@ViewData["groupName"]" data-values="@ViewData["groupId"]" placeholder="请选择图书馆" />*@
+                        </div>
+                        @*<div class="vae"></div>*@
+                        <div class="phone user-name common-div">
+                            <span>手机号码</span>
+                            @*<p>@ViewBag.phone</p>*@
+                            <input id="phone" name="phone" value="@ViewBag.phone" readonly="readonly" />
+                        </div>
+                        @*<div class="vae"></div>*@
+                        <div class="common-div real-name">
+                            <span>昵称</span> 
+                            <input id="name" name="name" value="@ViewBag.realName" placeholder="请输入昵称" />
+                        </div>
+                        <input type="hidden" value="@ViewBag.phone" id="hid1" />
+                        <div id='DataDatum' class="my-btn"></div>
+                        <div class="vae"></div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+        <div id="jsContainer" class="jsContainer" style="height: 0;width:360px">
+            <div id="tuna_alert" style="display:none;position:absolute;z-index:999;overflow:hidden;"></div>
+            <div id="tuna_jmpinfo" style="visibility:hidden;position:absolute;z-index:120;"></div>
+        </div>
+    </div>
+    <script src="~/Scripts/js/select_library.js"></script>
+    <script src="~/Scripts/js/jquery-weui.js"></script>
+    <input type="hidden" value="@ViewBag.QBank" id="qbank" />
+</div>
+<script type="text/javascript">
+    var competId = "@ViewBag.competId";
+    if (competId === "6A3480BE00D093EF" || $("#qbank").val() === "0") {
+        $(".weui-bar__item3").attr("href", "");
+    }
+</script>
+
+
+
+

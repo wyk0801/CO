@@ -1,0 +1,191 @@
+﻿@using System.Configuration
+@using ChuanYuan.Common
+@using ChuanYuan.Model;
+@{
+    ViewBag.Title = "榜单信息";
+    Layout = "~/Views/Shared/_ExamLayout.cshtml";
+}
+<script src="~/Content/login/js/jquery.placeholder.min.js"></script>
+<script>
+    $(function () {
+        $("input").placeholder();
+    });
+</script>
+<div class="header">
+    <ul>
+        <li class="border-b active">大赛公布</li>
+    </ul>
+</div>
+<div class="weui-tab" style="background:#475fa7">
+
+    <div class="weui-tab__bd" style="background:url(../../Content/images/img/bg.png);background-size:100%;background-position:0 -0.3rem;">
+        <div id="tab1" class="weui-tab__bd-item weui-tab__bd-item--active">
+            <div class="height" style="height:0.88rem;"></div>
+
+            <div class="search-bg">
+                <div class="search" id="searchBar">
+                    <input type="search" class="weui-search-bar__input" id="searchInput" placeholder="请输入名字进行搜索" required="">
+                    <button id="btnS"></button>
+                </div>
+            </div>
+            <div class="weui-panel__bd" style="margin-bottom: 3rem;margin-top:1.8rem;">
+            </div>
+        </div>
+    </div>
+    <div class="weui-tabbar plan bottom-menu">
+        <a href="/Exam/Result?competId=@ViewBag.competId" class="weui-tabbar__item weui-bar__item1">
+            <div class="weui-tabbar__icon"></div>
+        </a>
+        <a href="/Exam/Index?competId=@ViewBag.competId" class="weui-tabbar__item weui-bar__item2">
+            <div class="weui-tabbar__icon"></div>
+        </a>
+        <a href="/Account/Study?competId=@ViewBag.competId" class="weui-tabbar__item weui-bar__item3">
+            <div class="weui-tabbar__icon"></div>
+        </a>
+        <a href="/Account/Mine?competId=@ViewBag.competId" class="weui-tabbar__item weui-bar__item4">
+            <div class="weui-tabbar__icon"></div>
+        </a>
+    </div>
+    <input type="hidden" value="@ViewBag.QBank" id="qbank" />
+</div>
+<script src="~/Scripts/js/jquery.compet.cykj.js"></script>
+@*<script src="~/Script/lib/fastclick.js"></script>*@
+<script src="~/Scripts/js/jquery-weui.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var competId = "@ViewBag.competId";
+        if (competId === "6A3480BE00D093EF" || $("#qbank").val() === "0") {
+            $(".weui-bar__item3").attr("href", "");
+        }
+
+        //FastClick.attach(document.body);
+        //初始化加载发榜
+        ResultsReleased('', '');
+
+        $.each($(".left li"), function (index, el) {
+            $(el).append(formatName($(el).children().attr("alt"), '3'));
+        });
+
+        $('.btn').click(function () {
+            $('.left').animate({ width: 'toggle' }, 150);
+        });
+
+        //搜索按钮
+        $("#btnS").click(function () {
+            ResultsReleased("", $("#searchInput").val());
+        });
+        //回车键
+        $(window).keydown(function (event) {
+            if (event.which == 13) {
+                ResultsReleased("", $("#searchInput").val());
+                return false;
+            }
+        });
+    });
+
+    function ResultsReleased(e, name) {
+        debugger
+        var cdId = "0";
+        var type = "";
+        if (e != "") {
+            cdId = $(e).children().attr("id");
+            type = $(e).children().attr("alt");
+        }
+        if (name == undefined) name = '';
+        $.ajax({
+            //url: "http://localhost:64037/API/Exam/Express",
+            url: "@ConfigurationManager.AppSettings["API"]/API/Exam/Express",
+            type: "post",
+            async: false,
+            crossDomain: true == !(document.all),
+            dataType: "json",
+            data: {
+                "head": {
+                    "method": "co.compet.scoreresult1",
+                    "app_id": "co001",
+                    "timestamp": "2017-03-30 14:3000",
+                    "format": "json",
+                    "version": 1.0,
+                    "terminal_type": "web"
+                },
+                "param": {
+                    "compet_id": "@DESEncrypt.Decrypt(ViewBag.competId)",
+                    "cd_id": cdId,
+                    "real_name": name
+                }
+            },
+            success: function (data) {
+                var dt = eval('(' + data + ')');
+                if (dt.head.code == "200") {
+                    var html = "";
+                    var titles = "";
+                    $.each(dt.param.detail, function (index, value) {
+                        type = value.exam_type;
+                        var color = 'style="background:' + formatName(type, '4') + ';"';
+                        titles = '<div class="name">本时段大赛时间' + value.begin_time + '-' + value.end_time + '</div><div class="sai-sort">';
+                        html += titles;
+                        if (value.list.length != "0") {
+                            $.each(value.list, function (num, val) {
+                                var c = color;
+                                if ((num) % 2 != 0) c = '';
+
+                                html += '<a href="javascript:void(0);" class="weui-media-box plans weui-media-box_appmsg">';
+                                var ranks = val.rank;
+                                if (ranks > 3) {
+                                    html += '<div class="right"><div class="img-bg">' + ranks + '</div></div>';
+                                } else {
+                                    html += '<div class="right"><img src="/Content/images/' + ranks + '.png" class="sort1" alt=""></div>';
+                                }
+
+                                if (ranks == 1) {
+                                    html += '<div class="weui-media-box__hd" style="position:relative;">';
+                                    html += '<img src="/Content/images/maozi.png" style="position:absolute;top:-0.20rem;left:0.2rem;z-index:99; width:0.60rem;" alt="">';
+                                    html += '<img class="weui-media-box__thumb" style="position:relative;z-index:2;" src="@ViewBag.avatar" alt=""></div>';
+                                } else {
+                                    html += '<div class="weui-media-box__hd">';
+                                    html += '<img class="weui-media-box__thumb" src="@ViewBag.avatar" alt=""></div>';
+                                }
+
+                                //html += '<div class="weui-media-box__hd" style="position:relative;">';
+                                //if (ranks == 0) html += '<img src="/Content/images/maozi.png" style="position:absolute;top:-0.34rem;left:0;z-index:-0; width:1.03rem;height:0.50rem;" alt="">';
+                                //html += '<img class="weui-media-box__thumb" style="position:relative;z-index:2;" src="/Content/images/person2.png" alt=""></div>';
+
+                                html += '<div class="weui-media-box__bd">';
+                                html += '<h4 class="weui-media-box__title">' + val.phone + '<span style="margin-left: 8px;color: #ff5722;font-size: 14px;">' + val.title + '</span></h4>';
+                                //html += '<p class="weui-media-box__desc">' + val.phone + '</p>';
+                                html += '<p class="weui-media-box__desc">' + val.hostname + '</p></div>';
+                                html += '<div class="right_bd">';
+                                html += '<h4 class="weui-media-box__right">' + val.score + '<span style="margin-left: 0.02rem;color:#87554a;font-size: 0.26rem;">分</span></h4>';
+                                html += '<p class="weui-media-box__desc descr">答题时长' + val.time + '秒</p></div>';
+                                html += '<div class="line"><img src="/Content/images/line.png" alt=""></div></a>';
+                            });
+                        } else {
+                            html += '<div class="without" >很遗憾！没有中奖人员~~~</div>';
+                        }
+                        html += '</div>'
+                    });
+
+                    $(".weui-panel__bd").children().remove();
+                    $(".weui-panel__bd").append(html);
+                } else {
+                    if (type == "") {
+                        type = $(".left li").eq(0).children().attr("alt");
+                    }
+                    //$(".name p")[0].innerHTML = formatName(type, '3') + "还未到发榜时间，暂无榜单信息！";
+                    $(".weui-panel__bd").children().remove();
+                    $(".without").remove();
+                    $(".weui-panel__bd").after('<div class="without"><img src="/Content/images/wait2.png" alt=""></div>');
+                }
+            },
+            error: function (err) {
+
+            }
+        });
+    }
+    //function changeSrc() {
+    //    document.getElementById("weui-media-box__thumb").src = "hackanm.gif";
+    //}
+</script>
+
+

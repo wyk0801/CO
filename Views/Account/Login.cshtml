@@ -1,0 +1,98 @@
+﻿@{
+    ViewBag.Title = "登录";
+    Layout = "~/Views/Shared/_ExamLayout.cshtml";
+}
+
+<link href="~/Content/css/layer.css" rel="stylesheet" />
+<script src="~/Scripts/js/layer.min.js"></script>
+<script src="~/Scripts/js/jquery.cookie.js"></script>
+<script src="~/Content/login/js/jquery.placeholder.min.js"></script>
+<script>
+    $(function () {
+        $("input").placeholder();
+    });
+</script>
+<p id="message"></p>
+<script type="text/javascript">
+    var cModel = null;
+    var uModel = null;
+    $(document).ready(function () {
+         
+        var competSerialize = localStorage.getItem('competModel');
+        var userSerialize = localStorage.getItem('accountModel');
+        
+        if(competSerialize){
+            cModel = JSON.parse(competSerialize);
+        }else{
+            $('body').html('大赛信息已过期,请重新扫描进入.');
+            return;
+        }
+
+        //if(userSerialize){
+        //    uModel = JSON.parse(userSerialize);
+        //    window.location.href = '/Exam/Index';
+        //    return;
+        //}
+
+        $('.compet-title').text(cModel.competTitle);
+        $('.compet-sub-title').text(cModel.competSubTitle);
+        var code = request('ssoCode');
+        logincheck(code);
+        if (userSerialize) {
+            uModel = JSON.parse(userSerialize);
+            window.location.href = '/Exam/Index';
+            return;
+        }
+    });
+    function request(paras) {
+        var url = location.href;
+        var paraString = url.substring(url.indexOf("?") + 1, url.length).split("&");
+        var paraObj = {}
+        for (var i = 0; j = paraString[i]; i++) {
+            paraObj[j.substring(0, j.indexOf("=")).toLowerCase()] = j.substring(j.indexOf("=") + 1, j.length);
+        }
+        var returnValue = paraObj[paras.toLowerCase()];
+        if (typeof (returnValue) == "undefined") {
+            return "";
+        } else {
+            return returnValue;
+        }
+    };
+    function logincheck(code) {
+        $.ajax({
+            type: "post",
+            url: "/Account/GetUserInfo",
+            data: {code:code},
+            dataType: "json",
+            success: function (response) {
+                if (response.Status === 10001) {
+                    var user = {
+                        phone: response.Result.Phone,
+                        realName: response.Result.RealName,
+                        userId: response.Result.UserId
+                    }
+                    localStorage.setItem('accountModel', JSON.stringify(user));
+                    window.location.href = '/Exam/Index';
+                } else {
+                    $('#message').text(response.Message);
+                }
+            }
+        });
+    };
+
+    //弹框
+    function layerOpen(allVal,fn) {
+        layer.open({
+            content: allVal,
+            btn: '确定',
+            yes:fn
+        });
+    }
+
+</script>
+
+
+
+
+
+

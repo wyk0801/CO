@@ -1,0 +1,216 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>中国优秀传统文化知识大赛</title>
+    <style type="text/css">
+        .content {
+            width: 910px;
+            margin: 0 auto;
+            padding: 0 55px;
+            position: relative;
+            padding-top: 600px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #a5753d;
+        }
+
+        h3 {
+            font-size: 17px;
+            font-weight: 500;
+        }
+
+        p {
+            font-size: 15px;
+            color: #333;
+            color: #bc4645;
+        }
+
+        .question {
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body style="background: url(img/bg.jpg);">
+
+    <style type="text/css">
+        .overlay {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 998;
+            width: 100%;
+            height: 100%;
+            _padding: 0 20px 0 0;
+            background: #f6f4f5;
+            display: none;
+        }
+
+        .showbox {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            z-index: 9999;
+            opacity: 0;
+            filter: alpha(opacity=0);
+            margin-left: -80px;
+        }
+
+        #AjaxLoading {
+            border: 1px solid #8CBEDA;
+            color: #37a;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+            #AjaxLoading div.loadingWord {
+                width: 180px;
+                height: 50px;
+                line-height: 50px;
+                border: 2px solid #D6E7F2;
+                background: #fff;
+            }
+
+            #AjaxLoading img {
+                margin: 10px 15px;
+                float: left;
+                display: inline;
+            }
+    </style>
+    <div class="overlay"></div>
+    <div id="AjaxLoading" class="showbox">
+        <div class="loadingWord"><img src="img/waiting.gif">加载中，请稍候...</div>
+    </div>
+
+    <div class="content">
+        <img src="img/top.png" style="width: 1160px; position: absolute; top: 0; left: 0px; margin-bottom: 0px; display: block;">
+        <div style="margin-bottom: 40px;">
+            <h2 id="sez">少儿组</h2>
+            <!--<div class="question">
+                <h3><span>1、</span>下列各项中，对作品故事情节的叙述不准确的一项是</h3>
+                <p><span>答案：</span>玉淋雨回家，众人不知是宝玉，嬉闹着不给开门。宝玉生气，冒失地踢了前来开门的麝月</p>
+            </div>
+            <div class="question">
+                <h3><span>2、</span>下列各项中，对作品故事情节的叙述不准确的一项是</h3>
+                <p><span>答案：</span>玉淋雨回家，众人不知是宝玉，嬉闹着不给开门。宝玉生气，冒失地踢了前来开门的麝月</p>
+            </div>-->
+
+        </div>
+        <div style="margin-bottom: 40px;">
+            <h2 id="zxz">中学组</h2>
+
+        </div>
+        <div style="margin-bottom: 40px;">
+            <h2 id="crz">成人组</h2>
+
+        </div>
+    </div>
+</body>
+</html>
+<script src="js/jquery-1.10.2.min.js" type="text/javascript" charset="utf-8"></script>
+<script>
+    
+    var h = $(document).height();
+    $(function () {
+        zstsgItem();
+    });
+
+    //奖项信息
+    function zstsgItem() {
+        jQuery.support.cors = true;
+        $.ajax({
+            url: "http://co.yibaolib.com/API/Exam/Express",
+            type: "post",
+            dataType: "json",
+            crossDomain: true == !(document.all),
+            data: {
+                "head": {
+                    "method": "co.compet.zstsgItem",
+                    "app_id": "co001",
+                    "timestamp": "2017-03-30 14:3000",
+                    "format": "json",
+                    "version": 1.0,
+                    "terminal_type": "web"
+                },
+                "param": {
+                    "compet_id": "1",
+                    "user_id": "1"
+                }
+            },
+            beforeSend: function () {
+                // 禁用按钮防止重复提交
+                $(".overlay").css({ "height": h });
+                $(".overlay").css({ 'display': 'block', 'opacity': '0.8' });
+                $(".showbox").stop(true).animate({ 'margin-top': '300px', 'opacity': '1' }, 200);
+            },
+            success: function (data) {
+                var dt = eval('(' + data + ')');
+                if (dt.head.code == "200") {
+                    var list = eval('(' + dt.head.msg + ')'),
+                        seHtml = '',
+                        zxHtml = '',
+                        crHtml = '',
+                        seIndex = 1,
+                        zxIndex = 1,
+                        crIndex = 1;
+                    if (list) {
+                        $.each(list, function (i, n) {
+                            if (n.typetitle.indexOf("少儿") > 0) {
+                                seHtml += '<div class="question">';
+                                seHtml += '<h3><span>' + seIndex + '、</span>' + n.question + '</h3>';
+                                $.each(eval('(' + n.option + ')'),
+                                    function (x, y) {
+                                        if (y.isright === "yes") {
+                                            seHtml += '<p><span>答案：</span>' + y.value + '</p>';
+                                        }
+                                    });
+                                seIndex++;
+                                seHtml += '</div>';
+                            }
+                            if (n.typetitle.indexOf("中学") > 0) {
+                                zxHtml += '<div class="question">';
+                                zxHtml += '<h3><span>' + zxIndex + '、</span>' + n.question + '</h3>';
+                                $.each(eval('(' + n.option + ')'),
+                                    function (x, y) {
+                                        if (y.isright === "yes") {
+                                            zxHtml += '<p><span>答案：</span>' + y.value + '</p>';
+                                        }
+                                    });
+                                zxIndex++;
+                                zxHtml += '</div>';
+                            }
+                            if (n.typetitle.indexOf("成人") > 0) {
+                                crHtml += '<div class="question">';
+                                crHtml += '<h3><span>' + crIndex + '、</span>' + n.question + '</h3>';
+                                $.each(eval('(' + n.option + ')'),
+                                    function (x, y) {
+                                        if (y.isright === "yes") {
+                                            crHtml += '<p><span>答案：</span>' + y.value + '</p>';
+                                        }
+                                    });
+                                crIndex++;
+                                crHtml += '</div>';
+                            }
+                        });
+                        $("#sez").after(seHtml);
+                        $("#zxz").after(zxHtml);
+                        $("#crz").after(crHtml);
+                    }
+                }
+            },
+            complete: function () {
+                $(".showbox").stop(true).animate({ 'margin-top': '250px', 'opacity': '0' }, 400);
+                $(".overlay").css({ 'display': 'none', 'opacity': '0' });
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+    }
+
+
+</script>

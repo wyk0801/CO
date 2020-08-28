@@ -1,0 +1,95 @@
+﻿@{
+    ViewBag.Title = "用户中心";
+    Layout = "~/Views/Shared/_ExamLayout.cshtml";
+}
+<div class="header my-header">
+    <ul>
+        <li class="border-b active">我的</li>
+    </ul>
+</div>
+<div class="weui-tab" style="background:#ffffff;">
+    <div class="weui-tab__bd" style="background:url(/Content/images/img/bg1.png);background-size:100%;">
+        <div id="tab4" class="weui-tab__bd-item weui-tab__bd-item--active">
+            <div class="height" style="height:0.87rem;"></div>
+            <div class="k">
+                <img src="@ViewBag.avatar" alt="" />
+                <p style="margin-top:-0.1rem;">@ViewBag.userId</p>
+                <p>@ViewBag.realName</p>
+                <div class="weui-flex">
+                    <div class="weui-flex__item">
+                        <p>排名</p>
+                        <span>@ViewBag.competRank</span>
+                    </div>
+                    <div class="weui-flex__item">
+                        <p>分数</p>
+                        <span>@ViewBag.competScore</span>
+                    </div>
+                    <div class="weui-flex__item">
+                        <p>正确率</p>
+                        <span>@ViewBag.competCorrect</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="weui-panel__bd" style="margin-bottom: 3rem;">
+                <div class="weui-cells" style="padding-bottom: 0.2rem;">
+                    <a class="weui-cell plans weui-cell_access" href="/Exam/Record?competId=@ViewBag.competId">
+                        <div class="weui-cell__hd"> <img src="~/Content/images/my_4.png" style="width:0.44rem;" /></div>
+                        <div class="weui-cell__bd">
+                            <p>考试记录</p>
+                        </div>
+                        <div class="weui-cell__ft">
+                        </div>
+                    </a>
+                    @*<a class="weui-cell plans weui-cell_access" href="/Account/UpdatePwd?competId=@ViewBag.competId" hidden>
+                        <div class="weui-cell__hd"><img src="~/Content/images/my_5.png" style="width:0.44rem;" /></div>
+                        <div class="weui-cell__bd">
+                            <p>修改密码</p>
+                        </div>
+                        <div class="weui-cell__ft">
+                        </div>
+                    </a>
+                    <a class="weui-cell plans weui-cell_access" href="/Account/MyProfile?competId=@ViewBag.competId" hidden>
+                        <div class="weui-cell__hd">   <img src="~/Content/images/my_6.png" style="width:0.48rem;" /></div>
+                        <div class="weui-cell__bd">
+                            <p>我的资料</p>
+                        </div>
+                        <div class="weui-cell__ft">
+                        </div>
+                    </a>*@
+                </div>
+                <div class="weui-btn" id="btn_logout"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="weui-tabbar weui-tabbar4 plan">
+        <a href="/Exam/Result?competId=@ViewBag.competId" class="weui-tabbar__item weui-bar__item1">
+            <div class="weui-tabbar__icon"></div>
+        </a>
+        <a href="/Exam/Index?competId=@ViewBag.competId" class="weui-tabbar__item weui-bar__item2">
+            <div class="weui-tabbar__icon"></div>
+        </a>
+        <a href="/Account/Study?competId=@ViewBag.competId" class="weui-tabbar__item weui-bar__item3">
+            <div class="weui-tabbar__icon"></div>
+        </a>
+        <a href="/Account/Mine?competId=@ViewBag.competId" class="weui-tabbar__item weui-bar__item4">
+            <div class="weui-tabbar__icon"></div>
+        </a>
+    </div>
+    <input type="hidden" value="@ViewBag.QBank" id="qbank" />
+</div>
+<script src="~/Scripts/js/jquery-weui.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#btn_logout').click(function (e) {
+            e.preventDefault();
+            $.confirm('','您确定要退出系统吗？', function () {
+                window.location.href = '/Account/Logout/';
+            });
+        });
+    });
+</script>
+

@@ -1,0 +1,21 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>登录系统</title>
+</head>
+<body>
+    <div>
+        <script>
+            localStorage.removeItem('accountModel');
+            window.location.href = 'http://192.168.1.120/Home/Logout?redirect_url=http%3a%2f%2f192.168.1.120%3a8018%2fAccount%2fLogin';
+           //window.location.href='/Account/Login';
+        </script>
+    </div>
+</body>
+</html>

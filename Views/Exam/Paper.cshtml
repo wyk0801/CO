@@ -1,0 +1,167 @@
+﻿@using System.Configuration
+@{
+    ViewBag.Title = "参考试卷";
+    Layout = "~/Views/Shared/_ExamLayout.cshtml";
+}
+<div class="header my-header">
+    <ul>
+        <li class="border-b active"><a href="Record?competId=@ViewBag.competId" class="return"><img src="/Content/images/return.png" alt="" /></a>参考试卷</li>
+    </ul>
+</div>
+
+<div class="weui-tab">
+
+    <div class="weui-tab__bd">
+        <div id="tab2" class="weui-tab__bd-item record weui-tab__bd-item--active">
+            <div class="height" style="height:0.88rem;"></div>
+            <div class="k1">
+                <div class="bt">
+                    <p>@Model.title-@Model.sub_title</p>
+                </div>
+                <div class="sai"></div>
+                <div class="grade">分数：<span></span>分</div>
+                <div class="ranking">名次：<span></span>名</div>
+                <div class="time1">
+                    答题时长：<span></span>
+                </div>
+                <div id="qcount" style="overflow:hidden">
+                    <div class="tw">
+                        <div class="ture">答对</div>
+                        <span></span>
+                    </div>
+                    <div class="tw">
+                        <div class="wrong">答错</div>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="weui-panel__bd" style="margin-bottom: 3rem;">
+                <div class="content" style="padding-top:0.1rem;">
+                </div>
+            </div>
+        </div>
+        <div class="weui-tabbar weui-tabbar4 plan">
+            <a href="/Exam/Result?competId=@ViewBag.competId" class="weui-tabbar__item weui-bar__item1">
+                <div class="weui-tabbar__icon"></div>
+            </a>
+            <a href="/Exam/Index?competId=@ViewBag.competId" class="weui-tabbar__item weui-bar__item2">
+                <div class="weui-tabbar__icon"></div>
+            </a>
+            <a href="/Account/Study?competId=@ViewBag.competId" class="weui-tabbar__item weui-bar__item3">
+                <div class="weui-tabbar__icon"></div>
+            </a>
+            <a href="/Account/Mine?competId=@ViewBag.competId" class="weui-tabbar__item weui-bar__item4">
+                <div class="weui-tabbar__icon"></div>
+            </a>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $(".sai").append('<img src="/content/images/sai1.png" alt="">');
+        paperInfo();
+    });
+
+    function paperInfo() {
+        $.ajax({
+            url: "@ConfigurationManager.AppSettings["API"]/API/Exam/Express",
+            type: "post",
+            async: false,
+            crossDomain: true == !(document.all),
+            dataType: "json",
+            data: {
+                "head": {
+                    "method": "co.compet.paperlist",
+                    "app_id": "co001",
+                    "timestamp": "2017-03-30 14:3000",
+                    "format": "json",
+                    "version": 1.0,
+                    "terminal_type": "web"
+                },
+                "param": {
+                    "compet_id": "@Model.compet_id",
+                    "cd_id": "@Model.type_id",
+                    "user_id": "@Model.group_id"
+                }
+            },
+            success: function (data) {
+                var right = 0;
+                var dt = eval('(' + data + ')');
+                right = questionList(dt.param.qlist, right);
+
+                $(".time1").children().html(dt.param.used_time + "秒");
+                if (dt.param.rank > 3) {
+                    $(".ranking").children().html("" + dt.param.rank);
+                } else if (dt.param.rank == 0) {
+                    $(".ranking").children().html("-");
+                }
+                else {
+                    $(".ranking").children().append(dt.param.rank);
+                }
+
+                $(".grade").children().html(dt.param.score + "");
+                $(".tw .ture").next().html(right + "题");
+                $(".tw .wrong").next().html((dt.param.qlist.length - right) + "题");
+            },
+            error: function (err) {
+
+            }
+        });
+    }
+
+    function questionList(e, right) {
+        var html = '';
+        var iHtml = '';
+
+        $.each(e, function (index, value) {
+            var rOption = "";
+            var i = parseInt(index / 10);
+
+            if (index == 10 * i) {
+                iHtml += '<div class="timu">';
+            }
+
+            html += '<div class="questions">';
+            html += '<div class="weui-media-box__desc weui-media-box__tm" id="kj' + index + '" name="kj' + index + '">' + (index + 1) + '.' + value.question + '</div>';
+            html += '<div class="weui_cells weui_cells_consult">';
+            $.each(value.option, function (num, val) {
+                var result = "wait";
+                var oks = "ture";
+
+                if (val.isright == "yes") rOption = val.value;
+
+                if (val.key == value.myoption) {
+                    if (val.isright == "yes") {
+                        rOption = '';
+                        result = "get";
+                        right = right + 1;
+                    } else {
+                        result = "cuo";
+                        oks = "wrong";
+                    }
+                    iHtml += '<a href="#kj' + (index - 1) + '"><div class="' + oks + '">' + (index + 1) + '</div></a>';
+                }
+                if (value.myoption == 0 && val.isright == "yes") {
+                    iHtml += '<a href="#kj' + (index - 1) + '"><div class="wrong">' + (index + 1) + '</div></a>';
+                }
+                html += '<div class="weui-aw"><div class="img-k"><img src="/content/images/' + result + '.png" alt=""></div>';
+                html += '<label name="a' + index + '' + num + '" for="a' + index + '' + num + '">' + val.value + '</label></div>';
+            });
+
+            i++;
+            if (index == 10 * i - 1) {
+                iHtml += '</div>';
+            }
+            if (rOption != "") {
+                html += '</div><div style="overflow:hidden;"><div class="answer-bg">答案</div><span>' + rOption + '</span></div></div>';
+            } else {
+                html += '</div></div>';
+            }
+        });
+        $("#qcount").after(iHtml);
+        $(".content").append(html);
+
+        return right;
+    }
+</script>
+<script src="~/Scripts/js/jquery.min.js"></script>
